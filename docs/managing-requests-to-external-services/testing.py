@@ -100,32 +100,28 @@ def salteando_dns():
     return response
 
 
-def promediando_tiempos(tries=100):
-    def my_decorator(func):
-        def _promediando_tiempos(*args, **kwargs):
-            tiempos = []
-            data = {}
-            for i in range(tries):
-                with Timer(data):
-                    func()
-                tiempos.append(data.pop('elapsed_time'))
-                print('.', end='')
+def promediando_tiempos(func, tries=100):
+    tiempos = []
+    data = {}
+    for i in range(tries):
+        with Timer(data):
+            func()
+        tiempos.append(data.pop('elapsed_time'))
+        print('.', end='')
 
-            print('')
-            seconds = sum(tiempos) / len(tiempos)
-            print(('Cada request (total: {t}) tardó en promedio {s} segundos '
-                   '(min: {min}; max: {max})').format(s=seconds,
-                                                      t=len(tiempos),
-                                                      min=min(tiempos),
-                                                      max=max(tiempos)))
-        return _promediando_tiempos
-    return my_decorator
+    print('')
+    seconds = sum(tiempos) / len(tiempos)
+    print(('Cada request (total: {t}) tardó en promedio {s} segundos '
+           '(min: {min}; max: {max})').format(s=seconds,
+                                              t=len(tiempos),
+                                              min=min(tiempos),
+                                              max=max(tiempos)))
 
 
 if __name__ == '__main__':
-    intentos = 100
+    intentos = 50
     print('Ejecutando request usando DNS')
-    promediando_tiempos(intentos)(usando_dns)()
+    promediando_tiempos(usando_dns, intentos)
 
     print('Ejecutando request sin usar DNS')
-    promediando_tiempos(intentos)(salteando_dns)()
+    promediando_tiempos(usando_dns, intentos)
